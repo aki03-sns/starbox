@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html class="dark" lang="zh">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>星空信匣 — Starbox</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai:wght@300;400;700&display=swap" rel="stylesheet">
+<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+<script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }</script>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "surface-container-low": "#1c1b1b",
+        "on-tertiary": "#233143",
+        "on-error-container": "#ffdad6",
+        "on-primary-fixed": "#1c1b1b",
+        "primary-fixed-dim": "#c9c6c5",
+        "secondary-fixed-dim": "#c6c6c7",
+        "tertiary-container": "#00050f",
+        "on-primary-fixed-variant": "#474646",
+        "error-container": "#93000a",
+        "surface-container-lowest": "#0e0e0e",
+        "on-surface-variant": "#c4c7c7",
+        "on-secondary-fixed": "#1a1c1c",
+        "on-error": "#690005",
+        "surface-container": "#20201f",
+        "background": "#131313",
+        "secondary-fixed": "#e2e2e2",
+        "surface": "#131313",
+        "secondary": "#c6c6c7",
+        "tertiary": "#b9c8de",
+        "surface-variant": "#353535",
+        "on-background": "#e5e2e1",
+        "on-secondary-container": "#b4b5b5",
+        "error": "#ffb4ab",
+        "inverse-surface": "#e5e2e1",
+        "surface-dim": "#131313",
+        "primary-container": "#050505",
+        "outline": "#8e9192",
+        "surface-tint": "#c9c6c5",
+        "on-tertiary-container": "#6a788c",
+        "tertiary-fixed-dim": "#b9c8de",
+        "surface-bright": "#393939",
+        "surface-container-highest": "#353535",
+        "inverse-on-surface": "#313030",
+        "on-tertiary-fixed": "#0d1c2d",
+        "on-tertiary-fixed-variant": "#39485a",
+        "surface-container-high": "#2a2a2a",
+        "tertiary-fixed": "#d4e4fa",
+        "on-primary": "#313030",
+        "inverse-primary": "#5f5e5e",
+        "secondary-container": "#454747",
+        "on-secondary": "#2f3131",
+        "on-secondary-fixed-variant": "#454747",
+        "primary-fixed": "#e5e2e1",
+        "on-primary-container": "#797777",
+        "on-surface": "#e5e2e1",
+        "outline-variant": "#444748",
+        "primary": "#c9c6c5"
+      },
+      borderRadius: {
+        DEFAULT: "0.25rem",
+        lg: "0.5rem",
+        xl: "0.75rem",
+        full: "9999px"
+      },
+      spacing: {
+        "stack-sm": "0.5rem",
+        "margin-mobile": "1.5rem",
+        "gutter": "2rem",
+        "stack-md": "1.5rem",
+        "container-max": "1100px",
+        "stack-lg": "4rem"
+      },
+      fontFamily: {
+        "body-md": ["Hanken Grotesk"],
+        "headline-lg-mobile": ["Hanken Grotesk"],
+        "headline-md": ["Hanken Grotesk"],
+        "body-lg": ["Hanken Grotesk"],
+        "headline-lg": ["Hanken Grotesk"],
+        "label-sm": ["Hanken Grotesk"],
+        "serif": ["Noto Serif SC", "serif"]
+      },
+      fontSize: {
+        "body-md": ["16px", {"lineHeight": "1.6", "letterSpacing": "0.01em", "fontWeight": "400"}],
+        "headline-lg-mobile": ["32px", {"lineHeight": "1.2", "letterSpacing": "0.05em", "fontWeight": "300"}],
+        "headline-md": ["24px", {"lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "400"}],
+        "body-lg": ["18px", {"lineHeight": "1.8", "letterSpacing": "0.02em", "fontWeight": "400"}],
+        "headline-lg": ["48px", {"lineHeight": "1.2", "letterSpacing": "0.1em", "fontWeight": "300"}],
+        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.2em", "fontWeight": "600"}]
+      }
+    },
+  },
+}
+</script>
+<style>
+body {
+  background-color: #050505;
+  background-image: radial-gradient(circle at 50% 50%, rgba(20,20,25,1) 0%, rgba(5,5,5,1) 100%);
+  overflow: hidden;
+  color: #e5e2e1;
+}
+
+/* ─── Stars ─── */
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: twinkle var(--duration) ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.3); }
+  30%, 70% { opacity: calc(var(--max-opacity) * 1.5); transform: scale(1); }
+  50% { opacity: calc(var(--max-opacity) * 1.8); transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(255,255,255,calc(var(--glow-opacity) * 1.5)); }
+}
+
+/* ─── Shooting star ─── */
+.shooting-star {
+  position: absolute;
+  height: 2px;
+  background: var(--gradient);
+  filter: drop-shadow(0 0 8px var(--glow-color));
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 5;
+  will-change: transform, opacity;
+  transform-origin: left center;
+  animation: shooting var(--duration) linear forwards;
+}
+@keyframes shooting {
+  0% { transform: translateX(0) translateY(0) rotate(-45deg) scaleX(0); opacity: 0; }
+  5% { opacity: 0.8; transform: translateX(0) translateY(0) rotate(-45deg) scaleX(0.5); }
+  15% { opacity: 1; transform: translateX(-150px) translateY(150px) rotate(-45deg) scaleX(1); }
+  100% { transform: translateX(-1400px) translateY(1400px) rotate(-45deg) scaleX(1); opacity: 0; }
+}
+
+/* ─── Nebula ─── */
+.nebula {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(185,200,222,0.03) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(201,198,197,0.02) 0%, transparent 40%);
+  animation: nebula-breathe 15s ease-in-out infinite alternate;
+}
+@keyframes nebula-breathe {
+  0% { opacity: 0.4; transform: scale(1); }
+  100% { opacity: 0.8; transform: scale(1.1); }
+}
+
+/* ─── Glass ─── */
+.glass-panel {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+  animation: panel-glow 10s ease-in-out infinite alternate;
+}
+@keyframes panel-glow {
+  0% {
+    box-shadow: inset 0 0 32px rgba(255,255,255,0.01), inset 0 0 0 1px rgba(255,255,255,0.1),
+      0 0 40px rgba(224,231,255,0.08), 0 20px 60px rgba(0,0,0,0.6);
+  }
+  100% {
+    box-shadow: inset 0 0 32px rgba(255,255,255,0.01), inset 0 0 0 1px rgba(255,255,255,0.15),
+      0 0 70px rgba(224,231,255,0.2), 0 20px 70px rgba(0,0,0,0.65);
+  }
+}
+.glass-button {
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.glass-button:hover {
+  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 100%);
+  border-color: rgba(255,255,255,0.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 0 20px rgba(255,255,255,0.05);
+}
+
+/* ─── Writing area ─── */
+.writing-area {
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  scrollbar-width: none;
+}
+.writing-area::-webkit-scrollbar { display: none; }
+.writing-area::placeholder { color: rgba(196,199,199,0.4); }
+
+/* ─── Ink dissolve ─── */
+.ink-overlay {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 2;
+  overflow: hidden;
+}
+.ink-char {
+  position: absolute;
+  color: rgba(229,226,225,0.8);
+  font-size: 18px;
+  font-family: 'Noto Serif SC', serif;
+  white-space: pre;
+  animation: ink-fade var(--dur) ease-out forwards;
+  animation-delay: var(--delay);
+}
+@keyframes ink-fade {
+  0% { opacity: 1; filter: blur(0); transform: translate(0,0); }
+  40% { opacity: 0.5; filter: blur(2px); }
+  100% { opacity: 0; filter: blur(6px); transform: translate(var(--dx), var(--dy)); }
+}
+
+/* ─── Star burst ─── */
+.star-burst {
+  position: absolute;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: burst-fly var(--dur) ease-out forwards;
+}
+@keyframes burst-fly {
+  0% { opacity: 1; transform: translate(0,0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--bx), var(--by)) scale(0.2); }
+}
+
+/* ─── Reply char reveal ─── */
+.char-reveal {
+  opacity: 0;
+  filter: blur(4px);
+  animation: char-appear 0.35s ease-out forwards;
+  animation-delay: var(--cd);
+  display: inline;
+}
+@keyframes char-appear {
+  0% { opacity: 0; filter: blur(4px); }
+  100% { opacity: 1; filter: blur(0); }
+}
+
+/* ─── Loading text pulse ─── */
+.loading-text-pulse {
+  animation: text-pulse 2s ease-in-out infinite;
+}
+@keyframes text-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* ─── Pulse star ─── */
+.pulse-star {
+  animation: pulse-glow 4s ease-in-out infinite alternate;
+}
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 10px rgba(201,198,197,0.1); transform: scale(1); }
+  100% { box-shadow: 0 0 30px rgba(201,198,197,0.4); transform: scale(1.05); }
+}
+
+/* ─── Panel container (4:3) ─── */
+.panel-container {
+  width: min(90vw, 800px);
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 80vh;
+}
+
+/* ─── Constellation ─── */
+.constellation-container {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  width: 120px;
+  height: 100px;
+  cursor: pointer;
+  z-index: 30;
+}
+.constellation-star {
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  box-shadow: 0 0 8px rgba(255,255,255,0.8);
+}
+.constellation-line {
+  stroke: rgba(255,255,255,0.15);
+  stroke-width: 0.5;
+}
+.has-new-letter .constellation-star {
+  animation: star-breathe 3s ease-in-out infinite;
+}
+@keyframes star-breathe {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); box-shadow: 0 0 4px rgba(255,255,255,0.2); }
+  50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 12px rgba(255,255,255,0.9); }
+}
+.ripple-effect {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%) scale(0);
+  width: 150px; height: 150px;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+}
+.constellation-container:hover .ripple-effect {
+  animation: ripple-spread 1.5s cubic-bezier(0.25,0.46,0.45,0.94) infinite;
+}
+@keyframes ripple-spread {
+  0% { transform: translate(-50%,-50%) scale(0.2); opacity: 0.8; }
+  100% { transform: translate(-50%,-50%) scale(1.5); opacity: 0; }
+}
+
+/* ─── Dropdown ─── */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  min-width: 240px;
+  background: rgba(20,20,25,0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 6px;
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: all 0.2s;
+}
+.dropdown-menu.open {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+.dropdown-item {
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  color: rgba(229,226,225,0.7);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.dropdown-item:hover {
+  background: rgba(255,255,255,0.06);
+  color: rgba(229,226,225,1);
+}
+.dropdown-item.selected {
+  background: rgba(255,255,255,0.08);
+  color: rgba(229,226,225,1);
+}
+
+/* ─── Modal ─── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal-content {
+  width: min(600px, 90vw);
+  max-height: 80vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+.modal-content::-webkit-scrollbar { width: 4px; }
+.modal-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+/* ─── Favorites ─── */
+.fav-card {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 20px 24px;
+  transition: all 0.3s;
+}
+.fav-card:hover {
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  box-shadow: 0 0 20px rgba(224,231,255,0.05);
+}
+.letter-detail-box {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-top: 8px;
+}
+
+/* ─── Settings side panel ─── */
+.settings-side-panel {
+  position: fixed;
+  top: 0; left: 0;
+  width: 300px;
+  height: 100vh;
+  background: rgba(15,15,18,0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(255,255,255,0.08);
+  z-index: 60;
+  padding: 80px 28px 28px;
+  transform: translateX(-100%);
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+.settings-side-panel.open {
+  transform: translateX(0);
+}
+.settings-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 55;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.settings-backdrop.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ─── Toast ─── */
+.toast {
+  position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(20,20,25,0.9);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  color: rgba(229,226,225,0.9);
+  z-index: 100;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── Star Ring Canvas ─── */
+#star-ring-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 8;
+  pointer-events: auto;
+}
+</style>
+</head>
+
+<body class="h-screen w-screen flex flex-col items-center justify-center relative font-body-md text-body-md overflow-hidden">
+
+<!-- ════════════════════ VIEW: 书桌 ════════════════════ -->
+<div id="view-desk">
+  <!-- Starfield Background -->
+  <div class="absolute inset-0 z-0 pointer-events-none nebula"></div>
+  <div class="absolute inset-0 z-0 pointer-events-none" id="starfield"></div>
+
+  <!-- Shooting Stars Layer -->
+  <div class="absolute inset-0 z-5 pointer-events-none overflow-hidden" id="shooting-stars"></div>
+
+  <!-- Constellation (top-right) — new letter notification -->
+  <div class="constellation-container has-new-letter" onclick="goView('mailbox')" title="查看信箱">
+    <div class="ripple-effect"></div>
+    <svg class="absolute inset-0 w-full h-full overflow-visible" viewBox="0 0 120 100">
+      <line class="constellation-line" x1="20" x2="50" y1="20" y2="40"/>
+      <line class="constellation-line" x1="50" x2="40" y1="40" y2="80"/>
+      <line class="constellation-line" x1="40" x2="90" y1="80" y2="60"/>
+      <line class="constellation-line" x1="90" x2="100" y1="60" y2="20"/>
+    </svg>
+    <div class="constellation-star" style="top: 20%; left: 16%;"></div>
+    <div class="constellation-star" style="top: 40%; left: 42%;"></div>
+    <div class="constellation-star" style="top: 80%; left: 33%;"></div>
+    <div class="constellation-star" style="top: 60%; left: 75%;"></div>
+    <div class="constellation-star" style="top: 20%; left: 83%;"></div>
+  </div>
+
+  <!-- Top Left Nav -->
+  <div class="absolute left-8 z-20 flex flex-col items-center gap-6 top-12">
+    <button aria-label="设置" class="flex items-center justify-center text-on-surface hover:text-primary transition-colors group" onclick="toggleSettings()">
+      <span class="material-symbols-outlined text-[20px] group-hover:rotate-90 transition-transform duration-700">tune</span>
+    </button>
+    <button onclick="goView('favorites')" aria-label="收藏夹" class="glass-button w-10 h-10 rounded-full flex items-center justify-center text-on-surface hover:text-primary transition-all group relative overflow-hidden">
+      <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform duration-500" style="font-variation-settings: 'FILL' 1;">stars</span>
+    </button>
+  </div>
+
+  <!-- Central Content Area -->
+  <div class="z-10 flex flex-col items-center justify-center w-full p-4 inset-0 absolute">
+    <!-- 4:3 Glass Panel -->
+    <div class="panel-container">
+      <main class="glass-panel w-full h-full rounded-[32px] flex flex-col p-8 md:p-12 relative overflow-hidden group">
+        <!-- Recipient Selector -->
+        <div class="mb-8 relative">
+          <button id="recipient-btn" onclick="toggleDropdown()" class="flex items-center gap-3 text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors">
+            <span class="tracking-[0.2em] uppercase" id="recipient-label">Select Recipient</span>
+            <span class="material-symbols-outlined text-[16px] opacity-50 transition-transform" id="recipient-chevron">expand_more</span>
+          </button>
+          <!-- Dropdown Menu -->
+          <div id="dropdown-menu" class="dropdown-menu">
+            <div class="dropdown-item selected" data-value="" onclick="selectRecipient(this)">
+              <span style="opacity: 0.6">无尽深空</span> · 随机盲盒
+            </div>
+          </div>
+        </div>
+
+        <!-- Writing Area -->
+        <textarea id="content" autofocus class="writing-area flex-grow w-full font-body-lg text-body-lg text-on-surface focus:ring-0 p-0 placeholder:italic font-serif" placeholder="今天想说点什么。"></textarea>
+
+        <!-- Corner decorative accents -->
+        <div class="absolute top-0 left-0 w-12 h-12 border-t border-l border-white/10 rounded-tl-[32px] pointer-events-none"></div>
+        <div class="absolute bottom-0 right-0 w-12 h-12 border-b border-r border-white/10 rounded-br-[32px] pointer-events-none"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Bottom Center Send Button -->
+  <div class="flex flex-col items-center gap-4 absolute bottom-12 left-1/2 -translate-x-1/2 z-20">
+    <button onclick="sendLetter()" aria-label="寄出信件" class="glass-button w-16 h-16 rounded-full flex items-center justify-center text-primary relative overflow-hidden group pulse-star">
+      <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <span class="material-symbols-outlined text-[32px] group-hover:scale-110 transition-transform duration-500" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+    </button>
+    <span class="font-label-sm text-label-sm text-on-surface-variant opacity-60 uppercase tracking-[0.25em]">寄出</span>
+  </div>
+
+  <!-- Char count -->
+  <div id="char-count" class="absolute bottom-4 right-8 text-[11px] text-on-surface-variant opacity-30 tracking-wider z-20">0 / 2000</div>
+</div>
+
+<!-- ════════════════════ VIEW: 信箱 ════════════════════ -->
+<div id="view-mailbox" style="display:none; background: #000000; position:absolute; inset:0;">
+
+  <!-- Constellation exit (top-right) -->
+  <div class="constellation-container" onclick="goView('desk')" title="返回书桌">
+    <div class="ripple-effect"></div>
+    <svg class="absolute inset-0 w-full h-full overflow-visible" viewBox="0 0 120 100">
+      <line class="constellation-line" x1="20" x2="50" y1="20" y2="40"/>
+      <line class="constellation-line" x1="50" x2="40" y1="40" y2="80"/>
+      <line class="constellation-line" x1="40" x2="90" y1="80" y2="60"/>
+      <line class="constellation-line" x1="90" x2="100" y1="60" y2="20"/>
+    </svg>
+    <div class="constellation-star" style="top: 20%; left: 16%;"></div>
+    <div class="constellation-star" style="top: 40%; left: 42%;"></div>
+    <div class="constellation-star" style="top: 80%; left: 33%;"></div>
+    <div class="constellation-star" style="top: 60%; left: 75%;"></div>
+    <div class="constellation-star" style="top: 20%; left: 83%;"></div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="absolute left-8 z-20 flex flex-col items-center gap-6 top-12">
+    <button onclick="goView('favorites')" aria-label="收藏夹" class="glass-button w-10 h-10 rounded-full flex items-center justify-center text-on-surface hover:text-primary transition-all group relative overflow-hidden">
+      <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform duration-500" style="font-variation-settings: 'FILL' 1;">stars</span>
+    </button>
+  </div>
+
+  <!-- Title -->
+  <div class="absolute top-12 left-1/2 -translate-x-1/2 z-20 text-center">
+    <h2 class="font-label-sm text-label-sm text-on-surface-variant opacity-50 tracking-[0.2em] uppercase">信箱 · Stellar Mailbox</h2>
+  </div>
+
+  <!-- Three.js Canvas -->
+  <canvas id="star-ring-canvas"></canvas>
+
+  <!-- Empty (shown when no letters) -->
+  <div id="mailbox-empty" class="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none" style="display:none;">
+    <span class="material-symbols-outlined text-[48px] text-on-surface-variant opacity-20 mb-4">mark_email_unread</span>
+    <p class="text-on-surface-variant opacity-30 font-label-sm text-label-sm tracking-wider">星河尚无漂流，去书桌写一封信吧</p>
+  </div>
+</div>
+
+<!-- ════════════════════ VIEW: 收藏夹 ════════════════════ -->
+<div id="view-favorites" style="display:none;">
+  <div class="absolute inset-0 z-0 pointer-events-none nebula"></div>
+  <div class="absolute inset-0 z-0 pointer-events-none" id="starfield-fav"></div>
+
+  <!-- Sidebar -->
+  <div class="absolute left-8 z-20 flex flex-col items-center gap-6 top-12">
+    <button onclick="toggleSettings()" aria-label="设置" class="flex items-center justify-center text-on-surface hover:text-primary transition-colors group">
+      <span class="material-symbols-outlined text-[20px] group-hover:rotate-90 transition-transform duration-700">tune</span>
+    </button>
+    <button onclick="goView('desk')" aria-label="返回书桌" class="glass-button w-10 h-10 rounded-full flex items-center justify-center text-on-surface hover:text-primary transition-all group relative overflow-hidden">
+      <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform duration-500" style="font-variation-settings: 'FILL' 1;">stars</span>
+    </button>
+  </div>
+
+  <!-- Central panel -->
+  <div class="z-10 flex flex-col items-center justify-center w-full p-4 inset-0 absolute">
+    <div style="width:min(90vw,600px); height:75vh; display:flex; align-items:center; justify-content:center;">
+      <main class="glass-panel w-full h-full rounded-[32px] flex flex-col p-8 md:p-12 relative">
+        <div class="flex items-center gap-3 mb-6 shrink-0">
+          <span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings: 'FILL' 1;">stars</span>
+          <h2 class="font-label-sm text-label-sm text-on-surface-variant opacity-50 tracking-[0.2em] uppercase">收藏夹 · Favorites</h2>
+        </div>
+        <div class="w-full h-px bg-white/[0.06] mb-6 shrink-0"></div>
+        <div id="fav-list" class="flex-1 min-h-0 overflow-y-auto space-y-4 pr-2" style="scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent;"></div>
+        <div class="absolute top-0 left-0 w-12 h-12 border-t border-l border-white/10 rounded-tl-[32px] pointer-events-none"></div>
+        <div class="absolute bottom-0 right-0 w-12 h-12 border-b border-r border-white/10 rounded-br-[32px] pointer-events-none"></div>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ MODAL ════════════════════ -->
+<div id="letter-modal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-content glass-panel rounded-[24px] p-8 md:p-10 relative" onclick="event.stopPropagation()">
+    <button onclick="closeModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface transition-colors">
+      <span class="material-symbols-outlined text-[20px]">close</span>
+    </button>
+
+    <div class="mb-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-outlined text-[16px] text-on-surface-variant opacity-50">edit</span>
+        <span class="font-label-sm text-label-sm text-on-surface-variant opacity-50 tracking-[0.15em] uppercase">你写的信</span>
+      </div>
+      <div id="modal-user-content" class="font-serif text-[15px] leading-[1.9] text-on-surface opacity-80 whitespace-pre-wrap"></div>
+    </div>
+
+    <div class="w-full h-px bg-white/[0.06] mb-6"></div>
+
+    <div id="modal-reply-section">
+      <div id="modal-persona-info" class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center">
+          <span class="material-symbols-outlined text-[16px] text-tertiary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+        </div>
+        <div>
+          <div id="modal-persona-name" class="text-[14px] text-on-surface font-medium"></div>
+          <div id="modal-persona-era" class="text-[11px] text-on-surface-variant opacity-50 tracking-wider"></div>
+        </div>
+      </div>
+      <div id="modal-reply" class="font-serif text-[15px] leading-[1.9] text-on-surface whitespace-pre-wrap"></div>
+      <div class="flex items-center gap-4 mt-6 pt-4 border-t border-white/[0.06]">
+        <button id="modal-fav-letter-btn" onclick="toggleFavFromModal()" class="glass-button px-4 py-2 rounded-full font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+          <span id="modal-fav-letter-label">收藏此信</span>
+        </button>
+        <button id="modal-fav-persona-btn" onclick="favPersonaFromModal()" class="glass-button px-4 py-2 rounded-full font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2">
+          <span class="material-symbols-outlined text-[16px]">link</span>
+          <span>锁定该时空频段</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="modal-locked-section" style="display:none;">
+      <div class="flex flex-col items-center py-8">
+        <span class="material-symbols-outlined text-[40px] text-on-surface-variant opacity-20 mb-4">lock</span>
+        <p id="modal-lock-timer" class="text-on-surface-variant opacity-40 font-label-sm text-label-sm tracking-wider"></p>
+        <button id="modal-open-btn" onclick="openLetterFromModal()" class="glass-button px-6 py-3 rounded-full font-label-sm text-label-sm text-on-surface mt-6 flex items-center gap-2" style="display:none;">
+          <span class="material-symbols-outlined text-[18px]">lock_open</span>
+          <span>开启信件</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Settings backdrop -->
+<div id="settings-backdrop" class="settings-backdrop" onclick="toggleSettings()"></div>
+
+<!-- Settings side panel -->
+<div id="settings-panel" class="settings-side-panel">
+  <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center gap-3">
+      <span class="material-symbols-outlined text-primary text-[20px]">tune</span>
+      <span class="font-label-sm text-label-sm text-on-surface-variant opacity-50 tracking-[0.15em] uppercase">设置</span>
+    </div>
+    <button onclick="toggleSettings()" class="text-on-surface-variant hover:text-on-surface transition-colors">
+      <span class="material-symbols-outlined text-[20px]">close</span>
+    </button>
+  </div>
+
+  <!-- Glass Opacity -->
+  <div class="mb-7">
+    <label class="text-[12px] text-on-surface-variant opacity-50 tracking-wider block mb-3">毛玻璃透明度</label>
+    <input id="setting-glass-opacity" type="range" min="0" max="100" value="1" class="w-full accent-primary" oninput="applyGlassOpacity(this.value)">
+    <div class="flex justify-between text-[11px] text-on-surface-variant opacity-25 mt-1.5"><span>全透明</span><span>不透明</span></div>
+  </div>
+
+  <!-- Font Family -->
+  <div class="mb-7">
+    <label class="text-[12px] text-on-surface-variant opacity-50 tracking-wider block mb-3">正文字体</label>
+    <div class="flex flex-col gap-2">
+      <button class="font-option-btn glass-button px-4 py-2.5 rounded-xl text-[13px] text-on-surface-variant text-left" data-font="'Noto Serif SC', serif" onclick="applyFont(this)">思源宋体</button>
+      <button class="font-option-btn glass-button px-4 py-2.5 rounded-xl text-[13px] text-on-surface-variant text-left" data-font="'Hanken Grotesk', sans-serif" onclick="applyFont(this)">Hanken Grotesk</button>
+      <button class="font-option-btn glass-button px-4 py-2.5 rounded-xl text-[13px] text-on-surface-variant text-left" data-font="'LXGW WenKai', 'Noto Sans SC', sans-serif" onclick="applyFont(this)">霞鹜文楷 · 手写体</button>
+    </div>
+  </div>
+
+  <!-- Font Size -->
+  <div>
+    <label class="text-[12px] text-on-surface-variant opacity-50 tracking-wider block mb-3">字体大小</label>
+    <div class="flex items-center gap-3">
+      <button onclick="adjustFontSize(-1)" class="glass-button w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface">
+        <span class="material-symbols-outlined text-[18px]">remove</span>
+      </button>
+      <span id="font-size-display" class="text-[14px] text-on-surface-variant w-12 text-center">15px</span>
+      <button onclick="adjustFontSize(1)" class="glass-button w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface">
+        <span class="material-symbols-outlined text-[18px]">add</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Device ID managed in JS via localStorage -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  State
+// ═══════════════════════════════════════════════════════
+let currentView = 'desk';
+let lettersData = [];
+let currentLetterId = null;
+let selectedPersonaId = '';
+
+// 从 localStorage 获取或生成设备 ID（UUID v4）
+function getDeviceId() {
+  let id = localStorage.getItem('starbox_device_id');
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem('starbox_device_id', id);
+  }
+  return id;
+}
+const DEVICE_ID = getDeviceId();
+
+// ═══════════════════════════════════════════════════════
+//  Starfield (matching stitch exactly)
+// ═══════════════════════════════════════════════════════
+function createStarfield(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  for (let i = 0; i < 200; i++) {
+    const star = document.createElement('div');
+    star.classList.add('star');
+    const rand = Math.random();
+    const size = rand > 0.95 ? (Math.random() * 2 + 1) : (Math.random() * 1.5 + 0.5);
+    const starColor = Math.random();
+    if (starColor > 0.85) {
+      star.style.backgroundColor = '#b9c8de';
+    } else if (starColor > 0.7) {
+      star.style.backgroundColor = '#e5e2e1';
+    } else {
+      star.style.backgroundColor = '#ffffff';
+    }
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.setProperty('--duration', (Math.random() * 5 + 4) + 's');
+    star.style.setProperty('--delay', (Math.random() * 8) + 's');
+    star.style.setProperty('--max-opacity', (Math.random() * 0.5 + 0.2).toString());
+    star.style.setProperty('--glow-opacity', (Math.random() * 0.4 + 0.1).toString());
+    container.appendChild(star);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  Shooting Stars (matching stitch palette)
+// ═══════════════════════════════════════════════════════
+function createShootingStar() {
+  const container = document.getElementById('shooting-stars');
+  if (!container) return;
+  const star = document.createElement('div');
+  star.classList.add('shooting-star');
+  const startX = 70 + Math.random() * 50;
+  const startY = -10 + Math.random() * 40;
+  const colors = [
+    { core: 'rgba(255,255,255,1)', glow: 'rgba(138,43,226,0.4)' },
+    { core: 'rgba(240,248,255,1)', glow: 'rgba(65,105,225,0.35)' },
+    { core: 'rgba(255,255,255,1)', glow: 'rgba(100,149,237,0.3)' }
+  ];
+  const c = colors[Math.floor(Math.random() * colors.length)];
+  star.style.left = startX + '%';
+  star.style.top = startY + '%';
+  star.style.width = (Math.random() * 250 + 150) + 'px';
+  star.style.setProperty('--duration', (Math.random() * 3 + 4) + 's');
+  star.style.setProperty('--gradient', `linear-gradient(-45deg, ${c.core}, ${c.glow}, transparent)`);
+  star.style.setProperty('--glow-color', c.glow);
+  container.appendChild(star);
+  star.addEventListener('animationend', () => star.remove());
+  setTimeout(() => { if (star.parentNode) star.remove(); }, 8000);
+}
+function spawnShootingStarLoop() {
+  setTimeout(() => {
+    createShootingStar();
+    spawnShootingStarLoop();
+  }, Math.random() * 4000 + 3000);
+}
+
+//  Dropdown (recipient selector)
+// ═══════════════════════════════════════════════════════
+function toggleDropdown() {
+  const menu = document.getElementById('dropdown-menu');
+  const chevron = document.getElementById('recipient-chevron');
+  menu.classList.toggle('open');
+  chevron.style.transform = menu.classList.contains('open') ? 'rotate(180deg)' : '';
+}
+function selectRecipient(el) {
+  const val = el.dataset.value || '';
+  selectedPersonaId = val;
+  document.getElementById('recipient-label').textContent = val ? el.textContent.trim() : 'Select Recipient';
+  document.querySelectorAll('#dropdown-menu .dropdown-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  toggleDropdown();
+}
+async function loadFavoritesToDropdown() {
+  const r = await fetch('/api/favorites?device_id=' + encodeURIComponent(DEVICE_ID));
+  const favs = await r.json();
+  const menu = document.getElementById('dropdown-menu');
+  menu.innerHTML = `<div class="dropdown-item ${!selectedPersonaId ? 'selected' : ''}" data-value="" onclick="selectRecipient(this)">
+    <span style="opacity: 0.6">无尽深空</span> · 随机盲盒
+  </div>`;
+  for (const f of favs) {
+    const item = document.createElement('div');
+    item.className = 'dropdown-item' + (selectedPersonaId === f.id ? ' selected' : '');
+    item.dataset.value = f.id;
+    item.textContent = f.name;
+    item.onclick = function() { selectRecipient(this); };
+    menu.appendChild(item);
+  }
+}
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  const btn = document.getElementById('recipient-btn');
+  const menu = document.getElementById('dropdown-menu');
+  if (btn && !btn.contains(e.target) && menu && !menu.contains(e.target)) {
+    menu.classList.remove('open');
+    const ch = document.getElementById('recipient-chevron');
+    if (ch) ch.style.transform = '';
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+//  View navigation
+// ═══════════════════════════════════════════════════════
+function goView(name) {
+  ['desk', 'mailbox', 'favorites'].forEach(v => {
+    document.getElementById('view-' + v).style.display = v === name ? '' : 'none';
+  });
+  currentView = name;
+  if (name === 'desk') {
+    if (window.disposeStarRing) { window.disposeStarRing(); window.disposeStarRing = null; }
+    loadFavoritesToDropdown();
+  }
+  if (name === 'mailbox') {
+    loadLetters();
+    if (window.initStarRingScene) requestAnimationFrame(() => window.initStarRingScene());
+  }
+  if (name === 'favorites') {
+    if (window.disposeStarRing) { window.disposeStarRing(); window.disposeStarRing = null; }
+    loadFavoritesList();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  Send letter
+// ═══════════════════════════════════════════════════════
+function spawnBurst(btn) {
+  const rect = btn.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const count = 12 + Math.floor(Math.random() * 5);
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'star-burst';
+    const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
+    const dist = 50 + Math.random() * 80;
+    p.style.left = cx + 'px';
+    p.style.top = cy + 'px';
+    p.style.setProperty('--bx', Math.cos(angle) * dist + 'px');
+    p.style.setProperty('--by', Math.sin(angle) * dist + 'px');
+    p.style.setProperty('--dur', (0.6 + Math.random() * 0.5) + 's');
+    const size = 2 + Math.random() * 3;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    const colors = ['rgba(229,226,225,0.95)','rgba(201,198,197,0.9)','rgba(185,200,222,0.85)'];
+    const c = colors[Math.floor(Math.random() * colors.length)];
+    p.style.background = c;
+    p.style.boxShadow = '0 0 6px ' + c;
+    document.body.appendChild(p);
+    p.addEventListener('animationend', () => p.remove());
+  }
+}
+function spawnInkDissolve() {
+  const ta = document.getElementById('content');
+  const text = ta.value;
+  if (!text.trim()) return;
+  const cs = getComputedStyle(ta);
+  const rect = ta.getBoundingClientRect();
+  const padL = parseFloat(cs.paddingLeft);
+  const padT = parseFloat(cs.paddingTop);
+  const lineH = parseFloat(cs.lineHeight) || 28;
+  const charW = 10;
+  const wrap = document.createElement('div');
+  wrap.className = 'ink-overlay';
+  wrap.style.left = rect.left + 'px';
+  wrap.style.top = rect.top + 'px';
+  wrap.style.width = rect.width + 'px';
+  wrap.style.height = rect.height + 'px';
+  wrap.style.fontFamily = cs.fontFamily;
+  wrap.style.fontSize = cs.fontSize;
+  document.body.appendChild(wrap);
+  let col = 0, row = 0;
+  const maxCol = Math.floor((rect.width - padL * 2) / charW);
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '\n') { col = 0; row++; continue; }
+    const span = document.createElement('span');
+    span.className = 'ink-char';
+    span.textContent = ch;
+    span.style.left = (padL + col * charW) + 'px';
+    span.style.top = (padT + row * lineH) + 'px';
+    const angle = -Math.PI/2 + (Math.random() - 0.5) * 1.2;
+    const dist = 10 + Math.random() * 30;
+    span.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+    span.style.setProperty('--dy', (Math.sin(angle) * dist - 10) + 'px');
+    span.style.setProperty('--dur', (1.2 + Math.random() * 1.0) + 's');
+    span.style.setProperty('--delay', (Math.random() * 0.4) + 's');
+    wrap.appendChild(span);
+    col++;
+    if (col >= maxCol) { col = 0; row++; }
+  }
+  setTimeout(() => wrap.remove(), 3000);
+}
+async function sendLetter() {
+  const content = document.getElementById('content').value;
+  if (!content.trim()) { showToast('信件不能为空'); return; }
+  if (content.length > 2000) { showToast('信件不能超过 2000 字'); return; }
+  const body = { device_id: DEVICE_ID, content };
+  if (selectedPersonaId) body.persona_id = selectedPersonaId;
+
+  const btn = document.querySelector('#view-desk .pulse-star');
+  const ta = document.getElementById('content');
+  btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none';
+  spawnBurst(btn);
+  spawnInkDissolve();
+  ta.style.transition = 'opacity 0.8s, filter 0.8s';
+  ta.style.opacity = '0'; ta.style.filter = 'blur(8px)';
+  await new Promise(r => setTimeout(r, 800));
+  try {
+    const r = await fetch('/api/letters/send', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    if (r.ok) {
+      showToast('信件已投递进星河，等待时空回应…');
+      document.getElementById('content').value = '';
+      updateCharCount();
+    } else {
+      const data = await r.json();
+      if (data.detail && data.detail.error === 'rate_limited') showToast('今日投递已达上限');
+      else showToast('投递失败，请重试');
+    }
+  } catch(e) { showToast('网络异常'); }
+  ta.style.opacity = '1'; ta.style.filter = 'none';
+  btn.style.opacity = '1'; btn.style.pointerEvents = 'auto';
+}
+
+// ═══════════════════════════════════════════════════════
+//  Char count
+// ═══════════════════════════════════════════════════════
+function updateCharCount() {
+  document.getElementById('char-count').textContent = document.getElementById('content').value.length + ' / 2000';
+}
+document.getElementById('content').addEventListener('input', updateCharCount);
+
+// ═══════════════════════════════════════════════════════
+//  Mailbox — Letter data
+// ═══════════════════════════════════════════════════════
+async function loadLetters() {
+  const r = await fetch('/api/letters?device_id=' + encodeURIComponent(DEVICE_ID));
+  lettersData = await r.json();
+  const empty = document.getElementById('mailbox-empty');
+  if (!lettersData.length) { empty.style.display = ''; } else { empty.style.display = 'none'; }
+  if (window.updateLetterStars) window.updateLetterStars(lettersData);
+}
+function formatTime(sec) {
+  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+  if (h > 0) return h+'h '+m+'m';
+  if (m > 0) return m+'m '+s+'s';
+  return s+'s';
+}
+
+// ═══════════════════════════════════════════════════════
+//  Letter Modal
+// ═══════════════════════════════════════════════════════
+const revealedLetters = new Set();
+function revealReply(container, text, letterId) {
+  container.innerHTML = '';
+  if (!text) return;
+  container.textContent = text;
+  if (!revealedLetters.has(letterId)) {
+    revealedLetters.add(letterId);
+    container.style.opacity = '0';
+    container.style.filter = 'blur(8px)';
+    container.style.transition = 'opacity 1.2s ease-out, filter 1.2s ease-out';
+    requestAnimationFrame(() => {
+      container.style.opacity = '1';
+      container.style.filter = 'blur(0)';
+    });
+  }
+}
+function openLetterModal(letter) {
+  currentLetterId = letter.id;
+  const modal = document.getElementById('letter-modal');
+  document.getElementById('modal-user-content').textContent = letter.user_content || '';
+  const rs = document.getElementById('modal-reply-section');
+  const ls = document.getElementById('modal-locked-section');
+  if (letter.has_reply) {
+    rs.style.display = ''; ls.style.display = 'none';
+    document.getElementById('modal-persona-name').textContent = letter.persona_name || '';
+    document.getElementById('modal-persona-era').textContent = letter.persona_era || '';
+    revealReply(document.getElementById('modal-reply'), letter.reply_preview || '', letter.id);
+    document.getElementById('modal-fav-letter-label').textContent = letter.is_favorited ? '取消收藏' : '收藏此信';
+    document.getElementById('modal-fav-persona-btn').dataset.personaId = letter.persona_id || '';
+  } else {
+    rs.style.display = 'none'; ls.style.display = '';
+    if (letter.remaining_seconds > 0) {
+      document.getElementById('modal-lock-timer').textContent = '信件尚未解锁，还需等待 ' + formatTime(letter.remaining_seconds);
+      document.getElementById('modal-open-btn').style.display = 'none';
+    } else {
+      document.getElementById('modal-lock-timer').textContent = '信件已解锁';
+      document.getElementById('modal-open-btn').style.display = '';
+    }
+  }
+  modal.classList.add('active');
+}
+function closeModal() {
+  document.getElementById('letter-modal').classList.remove('active');
+  currentLetterId = null;
+}
+async function openLetterFromModal() {
+  if (!currentLetterId) return;
+  const btn = document.getElementById('modal-open-btn');
+  const timer = document.getElementById('modal-lock-timer');
+  btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none';
+  timer.innerHTML = '<span class="loading-text-pulse">信件正在穿越时空裂缝…</span>';
+  const phase2 = setTimeout(() => { if (timer.querySelector('.loading-text-pulse')) timer.innerHTML = '<span class="loading-text-pulse">已抵达，正在书写回信…</span>'; }, 2000);
+  try {
+    const r = await fetch('/api/letters/'+currentLetterId+'/open', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({device_id:DEVICE_ID})
+    });
+    if (r.ok) {
+      clearTimeout(phase2);
+      showToast('回信已送达');
+      loadLetters();
+      // reload the letter and show reply directly
+      const lr = await fetch('/api/letters?device_id=' + encodeURIComponent(DEVICE_ID));
+      const all = await lr.json();
+      const updated = all.find(l => l.id === currentLetterId);
+      if (updated) openLetterModal(updated);
+    } else {
+      const err = await r.json();
+      if (err.detail && err.detail.error === 'still_locked')
+        timer.textContent = '信件尚未解锁，还需等待 ' + formatTime(err.detail.remaining_seconds);
+      else { showToast('开启失败，请重试'); timer.textContent = ''; }
+    }
+  } catch(e) { showToast('网络异常'); timer.textContent = ''; }
+  btn.style.opacity = '1'; btn.style.pointerEvents = 'auto';
+}
+async function toggleFavFromModal() {
+  if (!currentLetterId) return;
+  const r = await fetch('/api/letters/'+currentLetterId+'/favorite', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({device_id:DEVICE_ID})
+  });
+  if (r.ok) {
+    const d = await r.json();
+    document.getElementById('modal-fav-letter-label').textContent = d.is_favorited ? '取消收藏' : '收藏此信';
+    showToast(d.is_favorited ? '已收藏' : '已取消收藏');
+  }
+}
+async function favPersonaFromModal() {
+  const pid = document.getElementById('modal-fav-persona-btn').dataset.personaId;
+  if (!pid) return;
+  const r = await fetch('/api/favorites', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({device_id:DEVICE_ID, persona_id:pid})
+  });
+  if (r.ok) {
+    const d = await r.json();
+    showToast(d.status==='added' ? '已锁定该时空频段' : '已收藏过');
+    loadFavoritesToDropdown();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  Favorites view
+// ═══════════════════════════════════════════════════════
+async function loadFavoritesList() {
+  const r = await fetch('/api/letters?device_id='+encodeURIComponent(DEVICE_ID));
+  const letters = (await r.json()).filter(l => l.is_favorited);
+  const el = document.getElementById('fav-list');
+  el.innerHTML = '';
+  if (!letters.length) {
+    el.innerHTML = `<div class="flex flex-col items-center py-16">
+      <span class="material-symbols-outlined text-[40px] text-on-surface-variant opacity-15 mb-4">favorite_border</span>
+      <p class="text-on-surface-variant opacity-25 font-label-sm text-label-sm tracking-wider">还没有收藏的信件</p>
+    </div>`;
+    return;
+  }
+  for (const l of letters) {
+    const card = document.createElement('div');
+    card.className = 'fav-card';
+    let html = `<div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-[16px] text-tertiary opacity-60" style="font-variation-settings:'FILL' 1">auto_awesome</span>
+        <span class="text-[13px] text-on-surface-variant opacity-60">${esc(l.persona_name||'未知角色')}</span>
+        ${l.persona_era ? '<span class="text-[11px] text-on-surface-variant opacity-30">· '+esc(l.persona_era)+'</span>' : ''}
+      </div>
+      <span class="text-[11px] text-on-surface-variant opacity-25 tracking-wider">${esc(l.created_at||'')}</span>
+    </div>`;
+    html += `<div class="letter-detail-box font-serif text-[14px] leading-[1.8] text-on-surface opacity-70 whitespace-pre-wrap mb-3">${esc(l.user_content||'')}</div>`;
+    if (l.has_reply) html += `<div class="letter-detail-box font-serif text-[14px] leading-[1.8] text-on-surface opacity-80 whitespace-pre-wrap">${esc(l.reply_preview||'')}</div>`;
+    html += `<div class="flex items-center gap-3 mt-4 pt-3 border-t border-white/[0.04]">
+      <button onclick="toggleFavFromFav('${l.id}')" class="glass-button px-3 py-1.5 rounded-full font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[14px]" style="font-variation-settings:'FILL' 1">favorite</span>
+        <span>取消收藏</span>
+      </button>
+    </div>`;
+    card.innerHTML = html;
+    el.appendChild(card);
+  }
+}
+async function toggleFavFromFav(letterId) {
+  const r = await fetch('/api/letters/'+letterId+'/favorite', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({device_id:DEVICE_ID})
+  });
+  if (r.ok) { showToast('已取消收藏'); loadFavoritesList(); }
+}
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+// ═══════════════════════════════════════════════════════
+//  Toast
+// ═══════════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════════════════════════
+//  Settings
+// ═══════════════════════════════════════════════════════
+let currentFontSize = 15;
+function toggleSettings() {
+  document.getElementById('settings-panel').classList.toggle('open');
+  document.getElementById('settings-backdrop').classList.toggle('open');
+}
+function applyGlassOpacity(val) {
+  const bg = `rgba(255,255,255,${(val / 100) * 0.04})`;
+  document.querySelectorAll('.glass-panel').forEach(el => el.style.background = bg);
+}
+function applyFont(btn) {
+  const font = btn.dataset.font;
+  document.querySelectorAll('.writing-area, .font-serif, .letter-detail-box').forEach(el => el.style.fontFamily = font);
+  document.querySelectorAll('.font-option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+function adjustFontSize(delta) {
+  currentFontSize = Math.max(12, Math.min(22, currentFontSize + delta));
+  document.getElementById('font-size-display').textContent = currentFontSize + 'px';
+  document.querySelectorAll('.writing-area').forEach(el => el.style.fontSize = currentFontSize + 'px');
+  document.querySelectorAll('.letter-detail-box, #modal-user-content, #modal-reply').forEach(el => el.style.fontSize = (currentFontSize - 1) + 'px');
+}
+
+// ═══════════════════════════════════════════════════════
+//  Init
+// ═══════════════════════════════════════════════════════
+createStarfield('starfield');
+createStarfield('starfield-fav');
+setTimeout(spawnShootingStarLoop, 1000);
+loadFavoritesToDropdown();
+goView('desk');
+</script>
+
+<!-- ════════════════════ THREE.JS STAR NEBULA ════════════════════ -->
+<script type="module">
+import * as THREE from 'three';
+
+// ── State ──
+let renderer, scene, camera;
+let cloudPoints, cloudGeo;
+let letterStars = [], letterStarsGroup;
+let hoveredStar = null;
+let mouseNDC = { x: -999, y: -999 };
+let active = false, glowTex, raycaster;
+let rotAngle = 0;
+
+const COUNT = 7000;
+const RAY_COUNT = 50;
+const CORE_N = 1000;
+const DUST_N = 1000;
+const RAY_N = COUNT - CORE_N - DUST_N;
+const RAY_P = Math.floor(RAY_N / RAY_COUNT);
+const R_MAX = 5.5;
+const ROT_SPEED = 0.0008;
+
+let baseX, baseZ, baseBright;
+
+// ── Colors ──
+const COLORS = {
+  naruto_youth:[45,95,60], sasuke_travel:[190,85,60], asuka:[5,90,58],
+  sebastian:[35,80,55], wuxie_shahai:[340,70,58], tomioka_giyu:[210,90,55],
+  levi:[230,60,55], chronicler:[260,80,62], time_repairer:[280,70,58],
+  exile:[155,75,50], deep_singer:[170,80,48], library_eternal:[130,55,52],
+  self_aware_ai:[185,60,55],
+};
+function pColor(id) {
+  const c = COLORS[id] || [0,0,60];
+  return new THREE.Color().setHSL(c[0]/360, c[1]/100, c[2]/100);
+}
+
+// ── Glow texture ──
+function makeGlowTex() {
+  const cv = document.createElement('canvas');
+  cv.width = 64; cv.height = 64;
+  const ctx = cv.getContext('2d');
+  const g = ctx.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,   'rgba(255,255,255,1)');
+  g.addColorStop(0.15, 'rgba(240,245,255,0.7)');
+  g.addColorStop(0.4, 'rgba(200,220,255,0.25)');
+  g.addColorStop(0.7, 'rgba(160,200,255,0.06)');
+  g.addColorStop(1,   'rgba(120,170,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,64,64);
+  return new THREE.CanvasTexture(cv);
+}
+
+// ══════════════════════════════════════════════════════════
+//  Build starburst nebula
+// ══════════════════════════════════════════════════════════
+function buildNebula() {
+  const pos = new Float32Array(COUNT * 3);
+  const col = new Float32Array(COUNT * 3);
+  baseX = new Float32Array(COUNT);
+  baseZ = new Float32Array(COUNT);
+  baseBright = new Float32Array(COUNT);
+
+  let idx = 0;
+
+  // ── Core ──
+  for (let i = 0; i < CORE_N; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const r = Math.pow(Math.random(), 3) * 0.5;
+    baseX[idx] = Math.cos(a) * r;
+    baseZ[idx] = Math.sin(a) * r;
+    baseBright[idx] = 0.9 + Math.random() * 0.1;
+    idx++;
+  }
+
+  // ── Curved rays ──
+  for (let ri = 0; ri < RAY_COUNT; ri++) {
+    const baseAngle = (ri / RAY_COUNT) * Math.PI * 2;
+    const curveDir = (Math.random() - 0.5) * 2;
+    const curveStrength = 0.3 + Math.random() * 0.5;
+    const rayLen = R_MAX * (0.7 + Math.random() * 0.3);
+
+    for (let j = 0; j < RAY_P; j++) {
+      const t = (j + 0.5) / RAY_P;
+      const r = 0.3 + t * rayLen;
+      const dev = curveDir * curveStrength * t * t;
+      const angle = baseAngle + dev;
+
+      const density = Math.sin(t * Math.PI) * (1 - 0.3 * t);
+      if (Math.random() > density * 1.2) { idx++; continue; }
+
+      const width = 0.06 + 0.14 * Math.sin(t * Math.PI);
+      const spread = (Math.random() - 0.5) * width;
+
+      let x = Math.cos(angle) * r + Math.cos(angle + Math.PI / 2) * spread;
+      let z = Math.sin(angle) * r + Math.sin(angle + Math.PI / 2) * spread;
+
+      if (t > 0.75) {
+        const d = (t - 0.75) / 0.25;
+        x += (Math.random() - 0.5) * d * 0.8;
+        z += (Math.random() - 0.5) * d * 0.8;
+      }
+
+      baseX[idx] = x;
+      baseZ[idx] = z;
+      baseBright[idx] = Math.max(0.2, density * (0.85 - r * 0.05));
+      idx++;
+    }
+  }
+
+  // ── Gap dust ──
+  while (idx < COUNT) {
+    const a = Math.random() * Math.PI * 2;
+    const r = 0.5 + Math.random() * (R_MAX - 0.5);
+    baseX[idx] = Math.cos(a) * r;
+    baseZ[idx] = Math.sin(a) * r;
+    baseBright[idx] = 0.15 + Math.random() * 0.25;
+    idx++;
+  }
+
+  // ── Write geometry ──
+  for (let i = 0; i < COUNT; i++) {
+    pos[i * 3] = baseX[i]; pos[i * 3 + 1] = 0; pos[i * 3 + 2] = baseZ[i];
+    const v = baseBright[i];
+    col[i * 3] = v; col[i * 3 + 1] = v; col[i * 3 + 2] = v;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  return geo;
+}
+
+// ══════════════════════════════════════════════════════════
+//  Rotate nebula gently
+// ══════════════════════════════════════════════════════════
+function rotateNebula() {
+  rotAngle += ROT_SPEED;
+  const pos = cloudGeo.attributes.position.array;
+  const c = Math.cos(rotAngle), s = Math.sin(rotAngle);
+  for (let i = 0; i < COUNT; i++) {
+    const x = baseX[i], z = baseZ[i];
+    pos[i * 3] = x * c - z * s;
+    pos[i * 3 + 1] = 0;
+    pos[i * 3 + 2] = x * s + z * c;
+  }
+  cloudGeo.attributes.position.needsUpdate = true;
+}
+
+// ══════════════════════════════════════════════════════════
+//  Init
+// ══════════════════════════════════════════════════════════
+function initScene() {
+  const canvas = document.getElementById('star-ring-canvas');
+  if (!canvas) return false;
+
+  const W = window.innerWidth, H = window.innerHeight;
+
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
+  camera.position.set(0, 14, 0.1);
+  camera.lookAt(0, 0, 0);
+
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(W, H);
+  renderer.setClearColor(0x020810, 1);
+
+  // ── Spiral cloud ──
+  cloudGeo = buildNebula();
+  const cloudMat = new THREE.PointsMaterial({
+    size: 0.15,
+    map: makeGlowTex(),
+    vertexColors: true,
+    transparent: true,
+    opacity: 1.0,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    sizeAttenuation: true,
+  });
+  cloudPoints = new THREE.Points(cloudGeo, cloudMat);
+  scene.add(cloudPoints);
+
+  // ── Letter stars ──
+  letterStarsGroup = new THREE.Group();
+  scene.add(letterStarsGroup);
+
+  glowTex = makeGlowTex();
+  raycaster = new THREE.Raycaster();
+  raycaster.params.Points.threshold = 0.5;
+  return true;
+}
+
+// ══════════════════════════════════════════════════════════
+//  Update letter stars
+// ══════════════════════════════════════════════════════════
+function updateLetterStars(letters) {
+  if (!letterStarsGroup) return;
+
+  letterStars.forEach(s => {
+    letterStarsGroup.remove(s.mesh);
+    s.mesh.material.dispose();
+  });
+  letterStars = [];
+
+  const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+
+  letters.forEach((letter, i) => {
+    const color = pColor(letter.persona_id);
+    const isUnread = !letter.has_reply && (!letter.remaining_seconds || letter.remaining_seconds <= 0);
+
+    const isLocked = !letter.has_reply && letter.remaining_seconds > 0;
+    let bright;
+    if (letter.is_favorited) bright = 1.0;
+    else if (isLocked) bright = 1.2;
+    else if (isUnread) bright = 1.0;
+    else if (letter.has_reply) bright = 0.4;
+
+    // Spread using golden angle across nebula
+    const angle = i * goldenAngle;
+    const t = 0.25 + Math.random() * 0.5;
+    const r = 0.3 + t * R_MAX;
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute([Math.cos(angle)*r, 0, Math.sin(angle)*r], 3));
+    geo.setAttribute('color', new THREE.Float32BufferAttribute([color.r*bright, color.g*bright, color.b*bright], 3));
+
+    const mat = new THREE.PointsMaterial({
+      size: 0.5,
+      map: glowTex,
+      vertexColors: true,
+      transparent: true,
+      opacity: 1.0,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true,
+    });
+
+    const pts = new THREE.Points(geo, mat);
+    pts.userData = { letter, baseScale: 0.5, isUnread };
+    letterStarsGroup.add(pts);
+    letterStars.push({ mesh: pts, letter, baseScale: 0.5, isUnread, color, bright });
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+//  Mouse
+// ══════════════════════════════════════════════════════════
+function onMouseMove(e) {
+  if (!renderer) return;
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouseNDC.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouseNDC.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+}
+function onClick() {
+  if (hoveredStar && hoveredStar.userData && hoveredStar.userData.letter) {
+    openLetterModal(hoveredStar.userData.letter);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  Animate
+// ══════════════════════════════════════════════════════════
+function animate() {
+  if (!active) return;
+  requestAnimationFrame(animate);
+
+  const time = performance.now() * 0.001;
+
+  rotateNebula();
+
+  // Letter stars
+  raycaster.setFromCamera(mouseNDC, camera);
+  let newHover = null;
+
+  letterStars.forEach(({ mesh, isUnread, letter }) => {
+    const isLocked = !letter.has_reply && letter.remaining_seconds > 0;
+    if (isLocked) {
+      const pulse = 1.0 + 0.4 * Math.sin(time * 3);
+      mesh.material.size = 0.5 * pulse;
+    } else if (isUnread) {
+      const pulse = 1.0 + 0.25 * Math.sin(time * 2.5);
+      mesh.material.size = 0.5 * pulse;
+    }
+  });
+
+  const hits = raycaster.intersectObjects(letterStars.map(s => s.mesh));
+  newHover = hits.length > 0 ? hits[0].object : null;
+
+  if (hoveredStar !== newHover) {
+    if (hoveredStar) { hoveredStar.material.size = 0.5; renderer.domElement.style.cursor = 'default'; }
+    hoveredStar = newHover;
+    if (hoveredStar) { hoveredStar.material.size = 0.85; renderer.domElement.style.cursor = 'pointer'; }
+  }
+
+  // Resize
+  const W = window.innerWidth, H = window.innerHeight;
+  if (renderer.domElement.width !== W * renderer.getPixelRatio()) {
+    camera.aspect = W / H;
+    camera.updateProjectionMatrix();
+    renderer.setSize(W, H);
+  }
+
+  renderer.render(scene, camera);
+}
+
+// ══════════════════════════════════════════════════════════
+//  Dispose
+// ══════════════════════════════════════════════════════════
+function dispose() {
+  active = false;
+  if (renderer) { renderer.dispose(); renderer = null; }
+  if (cloudGeo) { cloudGeo.dispose(); cloudGeo = null; }
+  cloudPoints = null;
+  letterStars.forEach(s => s.mesh.material.dispose());
+  letterStars = [];
+  letterStarsGroup = null;
+  if (glowTex) { glowTex.dispose(); glowTex = null; }
+  scene = null; camera = null; hoveredStar = null; raycaster = null;
+  rotAngle = 0; baseX = []; baseZ = []; baseBright = [];
+}
+
+window.initStarRingScene = function() {
+  if (active) return;
+  if (!initScene()) return;
+  active = true;
+  if (lettersData.length) updateLetterStars(lettersData);
+  renderer.domElement.addEventListener('mousemove', onMouseMove);
+  renderer.domElement.addEventListener('click', onClick);
+  animate();
+};
+window.updateLetterStars = updateLetterStars;
+window.disposeStarRing = dispose;
+</script>
+</body>
+</html>
