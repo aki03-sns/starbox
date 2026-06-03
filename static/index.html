@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>星空信匣 — Starbox</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.font.im/css2?family=Hanken+Grotesk:wght@300;400;600&display=swap" rel="stylesheet">
-<link href="https://fonts.font.im/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-<link href="https://fonts.font.im/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.font.im/css2?family=LXGW+WenKai:wght@300;400;700&display=swap" rel="stylesheet">
-<script async src="https://cdnjs.cloudflare.com/ajax/libs/es-module-shims/1.6.3/es-module-shims.min.js"></script>
-<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js" } }</script>
+<script src="/static/vendor/tailwind.js"></script>
+<link href="https://fonts.loli.net/css2?family=Hanken+Grotesk:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.loli.net/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<link href="https://fonts.loli.net/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.loli.net/css2?family=LXGW+WenKai:wght@300;400;700&display=swap" rel="stylesheet">
+<script async src="/static/vendor/es-module-shims.js"></script>
+<script type="importmap">{ "imports": { "three": "/static/vendor/three.module.js" } }</script>
 <script id="tailwind-config">
 tailwind.config = {
   darkMode: "class",
@@ -80,13 +80,13 @@ tailwind.config = {
         "stack-lg": "4rem"
       },
       fontFamily: {
-        "body-md": ["Hanken Grotesk"],
-        "headline-lg-mobile": ["Hanken Grotesk"],
-        "headline-md": ["Hanken Grotesk"],
-        "body-lg": ["Hanken Grotesk"],
-        "headline-lg": ["Hanken Grotesk"],
-        "label-sm": ["Hanken Grotesk"],
-        "serif": ["Noto Serif SC", "serif"]
+        "body-md": ["Hanken Grotesk", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+        "headline-lg-mobile": ["Hanken Grotesk", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+        "headline-md": ["Hanken Grotesk", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+        "body-lg": ["Hanken Grotesk", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+        "headline-lg": ["Hanken Grotesk", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+        "label-sm": ["Hanken Grotesk", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+        "serif": ["Noto Serif SC", "LXGW WenKai", "SimSun", "serif"]
       },
       fontSize: {
         "body-md": ["16px", {"lineHeight": "1.6", "letterSpacing": "0.01em", "fontWeight": "400"}],
