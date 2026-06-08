@@ -50,7 +50,6 @@ def init_db():
                 UNIQUE(device_id, persona_id)
             )
         """)
-        # 索引：加速按设备查询、按设备+日期限流
         conn.execute("CREATE INDEX IF NOT EXISTS idx_letters_device ON letters(device_id)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_letters_device_created ON letters(device_id, created_at)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_favorites_device ON favorites(device_id)")
@@ -112,7 +111,6 @@ def get_letters_by_device(device_id: str):
                 persona_name = row["persona"]
                 persona_era = row["era"]
 
-            # replied 信件返回实际使用的 persona_id，未回信返回用户选择
             actual_persona_id = row["persona_id_used"] or row["target_frequency"]
 
             entry = {

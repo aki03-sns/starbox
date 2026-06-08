@@ -1,16 +1,16 @@
-import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from typing import Optional
 
 import database
 import llm
-from config import MAX_CONTENT_LENGTH, DEBUG_MODE, IS_VERCEL
+from config import MAX_CONTENT_LENGTH, DEBUG_MODE
 
 
-# --- Lifespan (替代已废弃的 on_event) ---
+# --- Lifespan ---
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -89,11 +89,9 @@ async def open_letter(letter_id: str, req: OpenRequest):
         elif err == "still_locked":
             raise HTTPException(status_code=403, detail=result)
 
-    # 已有回信 — 直接返回缓存
     if "reply" in result:
         return result
 
-    # 需要调用 LLM
     row = result["row"]
     try:
         llm_result = await llm.generate_reply(row["content"], row["target_frequency"])
@@ -151,20 +149,11 @@ async def get_favorites(device_id: str):
     ]
 
 
-# --- Static files & Index ---
+# --- Static files ---
 
-# Vercel 通过 vercel.json 路由直接提供静态文件，不需要 FastAPI 挂载
-if not IS_VERCEL:
-    from fastapi.staticfiles import StaticFiles
-    app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.get("/")
 async def index():
-    # 读取 index.html 并返回（兼容本地和 Vercel 环境）
-    html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "index.html")
-    try:
-        with open(html_path, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
-    except FileNotFoundError:
-        return HTMLResponse(content="<h1>index.html not found</h1>", status_code=404)
+    return FileResponse("static/index.html")

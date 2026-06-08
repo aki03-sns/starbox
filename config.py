@@ -17,15 +17,8 @@ MAX_LETTERS_PER_DAY = 2
 # === 信件内容限制 ===
 MAX_CONTENT_LENGTH = 2000
 
-# === 环境检测 ===
-IS_VERCEL = os.getenv("VERCEL") == "1"
-
 # === 数据库 ===
-if IS_VERCEL:
-    # Vercel Serverless 只有 /tmp 可写
-    DATABASE_DIR = "/tmp"
-else:
-    DATABASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+DATABASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 DATABASE_PATH = os.path.join(DATABASE_DIR, "starbox.db")
 
 # === DeepSeek API ===
