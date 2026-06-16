@@ -1,13 +1,13 @@
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, Field
 from typing import Optional
 
 import database
 import llm
-from config import MAX_CONTENT_LENGTH, DEBUG_MODE
+from config import MAX_CONTENT_LENGTH, DEBUG_MODE, IS_VERCEL
 
 
 # --- Lifespan ---
@@ -176,9 +176,16 @@ async def get_favorites(device_id: str):
 
 # --- Static files ---
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+if not IS_VERCEL:
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.get("/")
 async def index():
-    return FileResponse("static/index.html")
+    html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "index.html")
+    try:
+        with open(html_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return HTMLResponse(content="<h1>index.html not found</h1>", status_code=404)
