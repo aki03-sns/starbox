@@ -17,9 +17,11 @@ MAX_CONTENT_LENGTH = 2000
 
 # === 环境检测 ===
 IS_VERCEL = os.getenv("VERCEL") == "1"
+IS_NETLIFY = os.getenv("NETLIFY") == "true"
+IS_SERVERLESS = IS_VERCEL or IS_NETLIFY
 
 # === 数据库 ===
-if IS_VERCEL:
+if IS_SERVERLESS:
     DATABASE_DIR = "/tmp"
 else:
     DATABASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")

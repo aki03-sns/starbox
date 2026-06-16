@@ -7,7 +7,7 @@ from typing import Optional
 
 import database
 import llm
-from config import MAX_CONTENT_LENGTH, DEBUG_MODE, IS_VERCEL
+from config import MAX_CONTENT_LENGTH, DEBUG_MODE, IS_SERVERLESS
 
 
 # --- Lifespan ---
@@ -176,7 +176,7 @@ async def get_favorites(device_id: str):
 
 # --- Static files ---
 
-if not IS_VERCEL:
+if not IS_SERVERLESS:
     from fastapi.staticfiles import StaticFiles
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
