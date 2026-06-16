@@ -6,10 +6,8 @@ import os
 DEBUG_MODE = False
 
 # === 锁定时长 ===
-if DEBUG_MODE:
-    LOCK_DURATION_SECONDS = 5
-else:
-    LOCK_DURATION_SECONDS = 8 * 60 * 60  # 8 hours
+# 0 = 立即回信，不锁定
+LOCK_DURATION_SECONDS = 0
 
 # === 限流 ===
 MAX_LETTERS_PER_DAY = 2

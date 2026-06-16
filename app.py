@@ -60,7 +60,32 @@ async def send_letter(req: SendRequest):
         )
 
     result = database.insert_letter(req.device_id, req.content, pid)
-    return result
+    letter_id = result["id"]
+
+    # 立即调用 AI 回信
+    try:
+        llm_result = await llm.generate_reply(req.content, pid)
+        replied_at = database.save_reply(
+            letter_id, llm_result["reply"], llm_result["persona_name"],
+            llm_result["persona_era"], llm_result["persona_id"]
+        )
+        return {
+            "id": letter_id,
+            "status": "replied",
+            "reply": llm_result["reply"],
+            "persona": {
+                "name": llm_result["persona_name"],
+                "era": llm_result["persona_era"],
+            },
+            "replied_at": replied_at,
+        }
+    except llm.LLMError:
+        # AI 回信失败，信件仍然保留
+        return {
+            "id": letter_id,
+            "status": "locked",
+            "unlock_at": result["unlock_at"],
+        }
 
 
 @app.get("/api/letters")

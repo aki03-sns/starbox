@@ -974,7 +974,12 @@ async function sendLetter() {
       body: JSON.stringify(body)
     });
     if (r.ok) {
-      showToast('信件已投递进星河，等待时空回应…');
+      const res = await r.json();
+      if (res.status === 'replied' && res.persona) {
+        showToast('来自 ' + res.persona.name + ' 的回信已送达 ✦');
+      } else {
+        showToast('信件已投递，等待时空回应…');
+      }
       document.getElementById('content').value = '';
       updateCharCount();
     } else {
