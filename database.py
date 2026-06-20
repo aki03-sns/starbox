@@ -41,18 +41,8 @@ def init_db():
                 replied_at       TEXT
             )
         """)
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS favorites (
-                id        INTEGER PRIMARY KEY AUTOINCREMENT,
-                device_id TEXT NOT NULL,
-                persona_id TEXT NOT NULL,
-                created_at TEXT DEFAULT (datetime('now')),
-                UNIQUE(device_id, persona_id)
-            )
-        """)
         conn.execute("CREATE INDEX IF NOT EXISTS idx_letters_device ON letters(device_id)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_letters_device_created ON letters(device_id, created_at)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_favorites_device ON favorites(device_id)")
         conn.commit()
 
 
@@ -124,7 +114,6 @@ def get_letters_by_device(device_id: str):
                 "reply_preview": row["reply"],
                 "persona_name": persona_name,
                 "persona_era": persona_era,
-                "is_favorited": bool(row["is_favorited"]),
                 "created_at": row["created_at"]
             }
             result.append(entry)
@@ -170,42 +159,3 @@ def save_reply(letter_id: str, reply: str, persona_name: str, persona_era: str, 
         )
         conn.commit()
     return replied_at
-
-
-def add_favorite(device_id: str, persona_id: str):
-    with get_db() as conn:
-        try:
-            conn.execute(
-                "INSERT INTO favorites (device_id, persona_id) VALUES (?, ?)",
-                (device_id, persona_id)
-            )
-            conn.commit()
-            return True
-        except sqlite3.IntegrityError:
-            return False
-
-
-def get_favorites(device_id: str):
-    with get_db() as conn:
-        rows = conn.execute(
-            "SELECT persona_id FROM favorites WHERE device_id=? ORDER BY created_at",
-            (device_id,)
-        ).fetchall()
-    return [r["persona_id"] for r in rows]
-
-
-def toggle_letter_favorite(letter_id: str, device_id: str):
-    with get_db() as conn:
-        row = conn.execute(
-            "SELECT is_favorited FROM letters WHERE id=? AND device_id=?",
-            (letter_id, device_id)
-        ).fetchone()
-        if not row:
-            return None
-        new_val = 0 if row["is_favorited"] else 1
-        conn.execute(
-            "UPDATE letters SET is_favorited=? WHERE id=?",
-            (new_val, letter_id)
-        )
-        conn.commit()
-    return {"id": letter_id, "is_favorited": bool(new_val)}

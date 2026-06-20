@@ -389,20 +389,6 @@ body {
 .modal-content::-webkit-scrollbar { width: 4px; }
 .modal-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
-/* ─── Favorites ─── */
-.fav-card {
-  background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 16px;
-  padding: 20px 24px;
-  transition: all 0.3s;
-}
-.fav-card:hover {
-  border-color: rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.05);
-  box-shadow: 0 0 20px rgba(224,231,255,0.05);
-}
 .letter-detail-box {
   background: rgba(255,255,255,0.02);
   border: 1px solid rgba(255,255,255,0.05);
@@ -508,10 +494,6 @@ body {
     <button aria-label="设置" class="flex items-center justify-center text-on-surface hover:text-primary transition-colors group" onclick="toggleSettings()">
       <span class="material-symbols-outlined text-[20px] group-hover:rotate-90 transition-transform duration-700">tune</span>
     </button>
-    <button onclick="goView('favorites')" aria-label="收藏夹" class="glass-button w-10 h-10 rounded-full flex items-center justify-center text-on-surface hover:text-primary transition-all group relative overflow-hidden">
-      <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform duration-500" style="font-variation-settings: 'FILL' 1;">stars</span>
-    </button>
   </div>
 
   <!-- Central Content Area -->
@@ -575,14 +557,6 @@ body {
     <div class="constellation-star" style="top: 20%; left: 83%;"></div>
   </div>
 
-  <!-- Sidebar -->
-  <div class="absolute left-8 z-20 flex flex-col items-center gap-6 top-12">
-    <button onclick="goView('favorites')" aria-label="收藏夹" class="glass-button w-10 h-10 rounded-full flex items-center justify-center text-on-surface hover:text-primary transition-all group relative overflow-hidden">
-      <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform duration-500" style="font-variation-settings: 'FILL' 1;">stars</span>
-    </button>
-  </div>
-
   <!-- Title -->
   <div class="absolute top-12 left-1/2 -translate-x-1/2 z-20 text-center">
     <h2 class="font-label-sm text-label-sm text-on-surface-variant opacity-50 tracking-[0.2em] uppercase">信箱 · Stellar Mailbox</h2>
@@ -593,39 +567,6 @@ body {
 
   <!-- Empty (shown when no letters) -->
   <div id="mailbox-empty" class="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none" style="display:none;">
-  </div>
-</div>
-
-<!-- ════════════════════ VIEW: 收藏夹 ════════════════════ -->
-<div id="view-favorites" style="display:none;">
-  <div class="absolute inset-0 z-0 pointer-events-none nebula"></div>
-  <div class="absolute inset-0 z-0 pointer-events-none" id="starfield-fav"></div>
-
-  <!-- Sidebar -->
-  <div class="absolute left-8 z-20 flex flex-col items-center gap-6 top-12">
-    <button onclick="toggleSettings()" aria-label="设置" class="flex items-center justify-center text-on-surface hover:text-primary transition-colors group">
-      <span class="material-symbols-outlined text-[20px] group-hover:rotate-90 transition-transform duration-700">tune</span>
-    </button>
-    <button onclick="goView('desk')" aria-label="返回书桌" class="glass-button w-10 h-10 rounded-full flex items-center justify-center text-on-surface hover:text-primary transition-all group relative overflow-hidden">
-      <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform duration-500" style="font-variation-settings: 'FILL' 1;">stars</span>
-    </button>
-  </div>
-
-  <!-- Central panel -->
-  <div class="z-10 flex flex-col items-center justify-center w-full p-4 inset-0 absolute">
-    <div style="width:min(90vw,600px); height:75vh; display:flex; align-items:center; justify-content:center;">
-      <main class="glass-panel w-full h-full rounded-[32px] flex flex-col p-8 md:p-12 relative">
-        <div class="flex items-center gap-3 mb-6 shrink-0">
-          <span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings: 'FILL' 1;">stars</span>
-          <h2 class="font-label-sm text-label-sm text-on-surface-variant opacity-50 tracking-[0.2em] uppercase">收藏夹 · Favorites</h2>
-        </div>
-        <div class="w-full h-px bg-white/[0.06] mb-6 shrink-0"></div>
-        <div id="fav-list" class="flex-1 min-h-0 overflow-y-auto space-y-4 pr-2" style="scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent;"></div>
-        <div class="absolute top-0 left-0 w-12 h-12 border-t border-l border-white/10 rounded-tl-[32px] pointer-events-none"></div>
-        <div class="absolute bottom-0 right-0 w-12 h-12 border-b border-r border-white/10 rounded-br-[32px] pointer-events-none"></div>
-      </main>
-    </div>
   </div>
 </div>
 
@@ -657,16 +598,6 @@ body {
         </div>
       </div>
       <div id="modal-reply" class="font-serif text-[15px] leading-[1.9] text-on-surface whitespace-pre-wrap"></div>
-      <div class="flex items-center gap-4 mt-6 pt-4 border-t border-white/[0.06]">
-        <button id="modal-fav-letter-btn" onclick="toggleFavFromModal()" class="glass-button px-4 py-2 rounded-full font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2">
-          <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
-          <span id="modal-fav-letter-label">收藏此信</span>
-        </button>
-        <button id="modal-fav-persona-btn" onclick="favPersonaFromModal()" class="glass-button px-4 py-2 rounded-full font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2">
-          <span class="material-symbols-outlined text-[16px]">link</span>
-          <span>锁定该时空频段</span>
-        </button>
-      </div>
     </div>
 
     <div id="modal-locked-section" style="display:none;">
@@ -835,20 +766,10 @@ function selectRecipient(el) {
   toggleDropdown();
 }
 async function loadFavoritesToDropdown() {
-  const r = await fetch('/api/favorites?device_id=' + encodeURIComponent(DEVICE_ID));
-  const favs = await r.json();
   const menu = document.getElementById('dropdown-menu');
-  menu.innerHTML = `<div class="dropdown-item ${!selectedPersonaId ? 'selected' : ''}" data-value="" onclick="selectRecipient(this)">
+  menu.innerHTML = `<div class="dropdown-item selected" data-value="" onclick="selectRecipient(this)">
     <span style="opacity: 0.6">无尽深空</span> · 随机盲盒
   </div>`;
-  for (const f of favs) {
-    const item = document.createElement('div');
-    item.className = 'dropdown-item' + (selectedPersonaId === f.id ? ' selected' : '');
-    item.dataset.value = f.id;
-    item.textContent = f.name;
-    item.onclick = function() { selectRecipient(this); };
-    menu.appendChild(item);
-  }
 }
 // Close dropdown on outside click
 document.addEventListener('click', (e) => {
@@ -865,7 +786,7 @@ document.addEventListener('click', (e) => {
 //  View navigation
 // ═══════════════════════════════════════════════════════
 function goView(name) {
-  ['desk', 'mailbox', 'favorites'].forEach(v => {
+  ['desk', 'mailbox'].forEach(v => {
     document.getElementById('view-' + v).style.display = v === name ? '' : 'none';
   });
   currentView = name;
@@ -876,10 +797,6 @@ function goView(name) {
   if (name === 'mailbox') {
     loadLetters();
     if (window.initStarRingScene) requestAnimationFrame(() => window.initStarRingScene());
-  }
-  if (name === 'favorites') {
-    if (window.disposeStarRing) { window.disposeStarRing(); window.disposeStarRing = null; }
-    loadFavoritesList();
   }
 }
 
@@ -1047,8 +964,6 @@ function openLetterModal(letter) {
     document.getElementById('modal-persona-name').textContent = letter.persona_name || '';
     document.getElementById('modal-persona-era').textContent = letter.persona_era || '';
     revealReply(document.getElementById('modal-reply'), letter.reply_preview || '', letter.id);
-    document.getElementById('modal-fav-letter-label').textContent = letter.is_favorited ? '取消收藏' : '收藏此信';
-    document.getElementById('modal-fav-persona-btn').dataset.personaId = letter.persona_id || '';
   } else {
     rs.style.display = 'none'; ls.style.display = '';
     if (letter.remaining_seconds > 0) {
@@ -1095,77 +1010,7 @@ async function openLetterFromModal() {
   } catch(e) { showToast('网络异常'); timer.textContent = ''; }
   btn.style.opacity = '1'; btn.style.pointerEvents = 'auto';
 }
-async function toggleFavFromModal() {
-  if (!currentLetterId) return;
-  const r = await fetch('/api/letters/'+currentLetterId+'/favorite', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({device_id:DEVICE_ID})
-  });
-  if (r.ok) {
-    const d = await r.json();
-    document.getElementById('modal-fav-letter-label').textContent = d.is_favorited ? '取消收藏' : '收藏此信';
-    showToast(d.is_favorited ? '已收藏' : '已取消收藏');
-  }
-}
-async function favPersonaFromModal() {
-  const pid = document.getElementById('modal-fav-persona-btn').dataset.personaId;
-  if (!pid) return;
-  const r = await fetch('/api/favorites', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({device_id:DEVICE_ID, persona_id:pid})
-  });
-  if (r.ok) {
-    const d = await r.json();
-    showToast(d.status==='added' ? '已锁定该时空频段' : '已收藏过');
-    loadFavoritesToDropdown();
-  }
-}
 
-// ═══════════════════════════════════════════════════════
-//  Favorites view
-// ═══════════════════════════════════════════════════════
-async function loadFavoritesList() {
-  const r = await fetch('/api/letters?device_id='+encodeURIComponent(DEVICE_ID));
-  const letters = (await r.json()).filter(l => l.is_favorited);
-  const el = document.getElementById('fav-list');
-  el.innerHTML = '';
-  if (!letters.length) {
-    el.innerHTML = `<div class="flex flex-col items-center py-16">
-      <span class="material-symbols-outlined text-[40px] text-on-surface-variant opacity-15 mb-4">favorite_border</span>
-      <p class="text-on-surface-variant opacity-25 font-label-sm text-label-sm tracking-wider">还没有收藏的信件</p>
-    </div>`;
-    return;
-  }
-  for (const l of letters) {
-    const card = document.createElement('div');
-    card.className = 'fav-card';
-    let html = `<div class="flex items-center justify-between mb-3">
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-[16px] text-tertiary opacity-60" style="font-variation-settings:'FILL' 1">auto_awesome</span>
-        <span class="text-[13px] text-on-surface-variant opacity-60">${esc(l.persona_name||'未知角色')}</span>
-        ${l.persona_era ? '<span class="text-[11px] text-on-surface-variant opacity-30">· '+esc(l.persona_era)+'</span>' : ''}
-      </div>
-      <span class="text-[11px] text-on-surface-variant opacity-25 tracking-wider">${esc(l.created_at||'')}</span>
-    </div>`;
-    html += `<div class="letter-detail-box font-serif text-[14px] leading-[1.8] text-on-surface opacity-70 whitespace-pre-wrap mb-3">${esc(l.user_content||'')}</div>`;
-    if (l.has_reply) html += `<div class="letter-detail-box font-serif text-[14px] leading-[1.8] text-on-surface opacity-80 whitespace-pre-wrap">${esc(l.reply_preview||'')}</div>`;
-    html += `<div class="flex items-center gap-3 mt-4 pt-3 border-t border-white/[0.04]">
-      <button onclick="toggleFavFromFav('${l.id}')" class="glass-button px-3 py-1.5 rounded-full font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface flex items-center gap-1.5">
-        <span class="material-symbols-outlined text-[14px]" style="font-variation-settings:'FILL' 1">favorite</span>
-        <span>取消收藏</span>
-      </button>
-    </div>`;
-    card.innerHTML = html;
-    el.appendChild(card);
-  }
-}
-async function toggleFavFromFav(letterId) {
-  const r = await fetch('/api/letters/'+letterId+'/favorite', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({device_id:DEVICE_ID})
-  });
-  if (r.ok) { showToast('已取消收藏'); loadFavoritesList(); }
-}
 function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
 // ═══════════════════════════════════════════════════════
@@ -1206,7 +1051,6 @@ function adjustFontSize(delta) {
 //  Init
 // ═══════════════════════════════════════════════════════
 createStarfield('starfield');
-createStarfield('starfield-fav');
 setTimeout(spawnShootingStarLoop, 1000);
 loadFavoritesToDropdown();
 goView('desk');
@@ -1426,8 +1270,7 @@ function updateLetterStars(letters) {
 
     const isLocked = !letter.has_reply && letter.remaining_seconds > 0;
     let bright;
-    if (letter.is_favorited) bright = 1.0;
-    else if (isLocked) bright = 1.2;
+    if (isLocked) bright = 1.2;
     else if (isUnread) bright = 1.0;
     else if (letter.has_reply) bright = 0.4;
 

@@ -34,15 +34,6 @@ class OpenRequest(BaseModel):
     device_id: str = Field(..., min_length=1, max_length=128)
 
 
-class FavoriteRequest(BaseModel):
-    device_id: str = Field(..., min_length=1, max_length=128)
-    persona_id: str = Field(..., min_length=1, max_length=64)
-
-
-class LetterFavoriteRequest(BaseModel):
-    device_id: str = Field(..., min_length=1, max_length=128)
-
-
 # --- Endpoints ---
 
 @app.post("/api/letters/send")
@@ -80,7 +71,6 @@ async def send_letter(req: SendRequest):
             "replied_at": replied_at,
         }
     except llm.LLMError:
-        # AI 回信失败，信件仍然保留
         return {
             "id": letter_id,
             "status": "locked",
@@ -93,14 +83,6 @@ async def get_letters(device_id: str):
     if not device_id or len(device_id) > 128:
         raise HTTPException(status_code=400, detail={"error": "invalid_device_id"})
     return database.get_letters_by_device(device_id)
-
-
-@app.post("/api/letters/{letter_id}/favorite")
-async def toggle_letter_favorite(letter_id: str, req: LetterFavoriteRequest):
-    result = database.toggle_letter_favorite(letter_id, req.device_id)
-    if result is None:
-        raise HTTPException(status_code=404, detail={"error": "letter_not_found"})
-    return result
 
 
 @app.post("/api/letters/{letter_id}/open")
@@ -149,29 +131,6 @@ async def get_personas():
             for p in personas
         ]
     }
-
-
-@app.post("/api/favorites")
-async def add_favorite(req: FavoriteRequest):
-    persona_map = llm.get_persona_map()
-    if req.persona_id not in persona_map:
-        raise HTTPException(status_code=400, detail={"error": "invalid_persona"})
-    added = database.add_favorite(req.device_id, req.persona_id)
-    if not added:
-        return {"status": "already_exists", "persona_id": req.persona_id}
-    return {"status": "added", "persona_id": req.persona_id}
-
-
-@app.get("/api/favorites")
-async def get_favorites(device_id: str):
-    if not device_id or len(device_id) > 128:
-        raise HTTPException(status_code=400, detail={"error": "invalid_device_id"})
-    fav_ids = database.get_favorites(device_id)
-    persona_map = llm.get_persona_map()
-    return [
-        {"id": pid, "name": persona_map[pid]["name"], "era": persona_map[pid]["era"]}
-        for pid in fav_ids if pid in persona_map
-    ]
 
 
 # --- Static files ---
